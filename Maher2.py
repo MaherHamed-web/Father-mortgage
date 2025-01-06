@@ -6,6 +6,27 @@ import plotly.graph_objects as go
 import altair as alt
 from dateutil.relativedelta import relativedelta  # To handle month-by-month increments
 
+# خريطة أسماء الأشهر العربية
+arabic_months = {
+    "January": "يناير",
+    "February": "فبراير",
+    "March": "مارس",
+    "April": "أبريل",
+    "May": "مايو",
+    "June": "يونيو",
+    "July": "يوليو",
+    "August": "أغسطس",
+    "September": "سبتمبر",
+    "October": "أكتوبر",
+    "November": "نوفمبر",
+    "December": "ديسمبر"
+}
+
+# تحويل اسم الشهر إلى اللغة العربية
+def get_arabic_month(date):
+    english_month = date.strftime('%B')  # Get the month in English
+    return arabic_months[english_month]
+
 # تفاصيل الرهن العقاري
 original_amount = 500000  # الرصيد الأصلي (ريال)
 remaining_balance = 168000  # الرصيد المتبقي (ريال)
@@ -25,10 +46,10 @@ st.subheader("تفاصيل الرهن العقاري")
 
 # عرض التفاصيل الأساسية
 st.write(f"### الرصيد الأصلي: {original_amount:.2f} ريال")
-st.write(f"### الشهر الذي بدأ فيه السداد: {start_date.strftime('%B %Y')}")
-st.write(f"### الشهر الحالي: {datetime.now().strftime('%B %Y')}")
+st.write(f"### الشهر الذي بدأ فيه السداد: {get_arabic_month(start_date)} {start_date.year}")
+st.write(f"### الشهر الحالي: {get_arabic_month(datetime.now())} {datetime.now().year}")
 st.write(f"### الرصيد المتبقي: {remaining_balance:.2f} ريال")
-st.write(f"### تاريخ الانتهاء المتوقع: {end_date.strftime('%B %Y')}")
+st.write(f"### تاريخ الانتهاء المتوقع: {get_arabic_month(end_date)} {end_date.year}")
 
 # إنشاء جدول السداد القادم
 st.subheader("جدول السداد القادم")
@@ -42,7 +63,7 @@ for i in range(1, total_months + 1):  # حتى اكتمال سداد الرهن
         next_balance = 0
     table_data.append({
         "السنة": next_month.year,
-        "الشهر": next_month.strftime('%B %Y'),
+        "الشهر": f"{get_arabic_month(next_month)} {next_month.year}",
         "القسط الشهري (ريال)": monthly_payment,
         "الرصيد المتبقي (ريال)": round(next_balance, 2)
     })
