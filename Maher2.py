@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta
+import pandas as pd
 
 # Set the initial mortgage details
 remaining_balance = 168000  # Initial remaining mortgage in Riyals
@@ -28,6 +29,28 @@ if language == "English":
     st.write(f"### Remaining Balance: {current_balance:.2f} Riyals")
     st.write(f"### Expected End Date: {end_date.strftime('%B %Y')}")
 
+    # Generate the repayment table
+    st.subheader("Upcoming Payment Schedule")
+    table_data = []
+    next_balance = current_balance
+    next_month = current_date if current_balance > 0 else end_date
+
+    for i in range(1, 25):  # Show up to the next 24 months
+        next_balance -= monthly_payment
+        if next_balance < 0:
+            next_balance = 0
+        table_data.append({
+            "Month": next_month.strftime('%B %Y'),
+            "Monthly Payment (Riyals)": monthly_payment,
+            "Remaining Balance (Riyals)": round(next_balance, 2)
+        })
+        next_month += timedelta(days=30)
+        if next_balance <= 0:
+            break
+
+    df = pd.DataFrame(table_data)
+    st.table(df)
+
 elif language == "العربية":
     st.title("متابعة سداد الرهن العقاري")
     st.subheader("تفاصيل الرهن العقاري")
@@ -41,3 +64,25 @@ elif language == "العربية":
     st.write(f"### الشهر الحالي: {current_date.strftime('%B %Y')}")
     st.write(f"### الرصيد المتبقي: {current_balance:.2f} ريال")
     st.write(f"### تاريخ الانتهاء المتوقع: {end_date.strftime('%B %Y')}")
+
+    # Generate the repayment table
+    st.subheader("جدول السداد القادم")
+    table_data = []
+    next_balance = current_balance
+    next_month = current_date if current_balance > 0 else end_date
+
+    for i in range(1, 25):  # Show up to the next 24 months
+        next_balance -= monthly_payment
+        if next_balance < 0:
+            next_balance = 0
+        table_data.append({
+            "الشهر": next_month.strftime('%B %Y'),
+            "القسط الشهري (ريال)": monthly_payment,
+            "الرصيد المتبقي (ريال)": round(next_balance, 2)
+        })
+        next_month += timedelta(days=30)
+        if next_balance <= 0:
+            break
+
+    df = pd.DataFrame(table_data)
+    st.table(df)
