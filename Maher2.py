@@ -7,35 +7,34 @@ import altair as alt
 from dateutil.relativedelta import relativedelta  # To handle month-by-month increments
 
 # تفاصيل الرهن العقاري
+original_amount = 500000  # الرصيد الأصلي (ريال)
 remaining_balance = 168000  # الرصيد المتبقي (ريال)
 monthly_payment = 1667      # القسط الشهري (ريال)
-start_date = datetime(2025, 1, 1)  # بداية السداد
+
+# حساب عدد الأشهر الإجمالي حتى الآن
+months_paid = (original_amount - remaining_balance) // monthly_payment
+start_date = datetime.now() - relativedelta(months=+months_paid)
 
 # حساب عدد الأشهر الإجمالي وتاريخ الانتهاء
-total_months = remaining_balance // monthly_payment
+total_months = original_amount // monthly_payment
 end_date = start_date + relativedelta(months=+total_months)
 
 # عرض العنوان والتفاصيل
 st.title("متابعة سداد الرهن العقاري")
 st.subheader("تفاصيل الرهن العقاري")
 
-# حساب الرصيد المتبقي بناءً على الشهر الحالي
-current_date = datetime.now()
-elapsed_months = ((current_date.year - start_date.year) * 12) + (current_date.month - start_date.month)
-current_balance = remaining_balance - (elapsed_months * monthly_payment)
-
-if current_balance < 0:
-    current_balance = 0
-
-st.write(f"### الشهر الحالي: {current_date.strftime('%B %Y')}")
-st.write(f"### الرصيد المتبقي: {current_balance:.2f} ريال")
+# عرض التفاصيل الأساسية
+st.write(f"### الرصيد الأصلي: {original_amount:.2f} ريال")
+st.write(f"### الشهر الذي بدأ فيه السداد: {start_date.strftime('%B %Y')}")
+st.write(f"### الشهر الحالي: {datetime.now().strftime('%B %Y')}")
+st.write(f"### الرصيد المتبقي: {remaining_balance:.2f} ريال")
 st.write(f"### تاريخ الانتهاء المتوقع: {end_date.strftime('%B %Y')}")
 
 # إنشاء جدول السداد القادم
 st.subheader("جدول السداد القادم")
 table_data = []
-next_balance = current_balance
-next_month = current_date.replace(day=1) if current_balance > 0 else end_date
+next_balance = remaining_balance
+next_month = datetime.now().replace(day=1)
 
 for i in range(1, total_months + 1):  # حتى اكتمال سداد الرهن
     next_balance -= monthly_payment
@@ -71,10 +70,10 @@ st.bar_chart(pd.DataFrame({"القسط السنوي": [monthly_payment * 12] * l
 
 # 3. الرسم الدائري للرصيد المدفوع والمتبقي
 st.subheader("النسبة بين المدفوع والمتبقي")
-paid_balance = remaining_balance - current_balance
+paid_balance = original_amount - remaining_balance
 pie_data = pd.DataFrame({
     "الفئة": ["المدفوع", "المتبقي"],
-    "المبلغ": [paid_balance, current_balance]
+    "المبلغ": [paid_balance, remaining_balance]
 })
 fig_pie = px.pie(pie_data, values="المبلغ", names="الفئة", title="النسبة بين المدفوع والمتبقي")
 st.plotly_chart(fig_pie)
@@ -86,7 +85,7 @@ st.area_chart(pd.DataFrame({"السداد التراكمي": cumulative_payments
 
 # 5. مقياس نسبة اكتمال الرهن العقاري
 st.subheader("نسبة اكتمال الرهن العقاري")
-progress = (paid_balance / remaining_balance) * 100 if remaining_balance > 0 else 100
+progress = (paid_balance / original_amount) * 100 if original_amount > 0 else 100
 fig_gauge = go.Figure(go.Indicator(
     mode="gauge+number",
     value=progress,
