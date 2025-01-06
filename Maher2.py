@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import altair as alt
+from dateutil.relativedelta import relativedelta  # To handle month-by-month increments
 
 # Set the initial mortgage details
 remaining_balance = 168000  # Initial remaining mortgage in Riyals
@@ -12,7 +13,7 @@ start_date = datetime(2025, 1, 1)  # Assume payments start January 2025
 
 # Calculate the total months and end date
 total_months = remaining_balance // monthly_payment
-end_date = start_date + timedelta(days=total_months * 30)
+end_date = start_date + relativedelta(months=+total_months)
 
 # Toggle for Language
 language = st.radio("Select Language / اختر اللغة", ("English", "العربية"))
@@ -36,7 +37,7 @@ if language == "English":
     st.subheader("Upcoming Payment Schedule")
     table_data = []
     next_balance = current_balance
-    next_month = current_date if current_balance > 0 else end_date
+    next_month = current_date.replace(day=1) if current_balance > 0 else end_date
 
     for i in range(1, 25):  # Show up to the next 24 months
         next_balance -= monthly_payment
@@ -47,7 +48,7 @@ if language == "English":
             "Monthly Payment (Riyals)": monthly_payment,
             "Remaining Balance (Riyals)": round(next_balance, 2)
         })
-        next_month += timedelta(days=30)
+        next_month += relativedelta(months=+1)
         if next_balance <= 0:
             break
 
@@ -72,7 +73,7 @@ elif language == "العربية":
     st.subheader("جدول السداد القادم")
     table_data = []
     next_balance = current_balance
-    next_month = current_date if current_balance > 0 else end_date
+    next_month = current_date.replace(day=1) if current_balance > 0 else end_date
 
     for i in range(1, 25):  # Show up to the next 24 months
         next_balance -= monthly_payment
@@ -83,7 +84,7 @@ elif language == "العربية":
             "القسط الشهري (ريال)": monthly_payment,
             "الرصيد المتبقي (ريال)": round(next_balance, 2)
         })
-        next_month += timedelta(days=30)
+        next_month += relativedelta(months=+1)
         if next_balance <= 0:
             break
 
