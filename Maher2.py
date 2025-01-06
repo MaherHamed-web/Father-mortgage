@@ -60,15 +60,7 @@ yearly_data = df.groupby("السنة").last().reset_index()
 years = yearly_data["السنة"].astype(str)
 balances = yearly_data["الرصيد المتبقي (ريال)"]
 
-# 1. الرسم الخطي للرصيد المتبقي
-st.subheader("الرصيد المتبقي عبر السنوات")
-st.line_chart(pd.DataFrame({"الرصيد المتبقي": balances}, index=years))
-
-# 2. الرسم البياني للأقساط السنوية
-st.subheader("تقدم السداد السنوي")
-st.bar_chart(pd.DataFrame({"القسط السنوي": [monthly_payment * 12] * len(years)}, index=years))
-
-# 3. الرسم الدائري للرصيد المدفوع والمتبقي
+# 1. الرسم الدائري للرصيد المدفوع والمتبقي
 st.subheader("النسبة بين المدفوع والمتبقي")
 paid_balance = original_amount - remaining_balance
 pie_data = pd.DataFrame({
@@ -78,12 +70,7 @@ pie_data = pd.DataFrame({
 fig_pie = px.pie(pie_data, values="المبلغ", names="الفئة", title="النسبة بين المدفوع والمتبقي")
 st.plotly_chart(fig_pie)
 
-# 4. الرسم البياني التراكمي للسداد
-st.subheader("التقدم التراكمي للسداد")
-cumulative_payments = yearly_data["الرصيد المتبقي (ريال)"].iloc[0] - balances  # حساب السداد التراكمي
-st.area_chart(pd.DataFrame({"السداد التراكمي": cumulative_payments, "الرصيد المتبقي": balances}, index=years))
-
-# 5. مقياس نسبة اكتمال الرهن العقاري
+# 2. مقياس نسبة اكتمال الرهن العقاري
 st.subheader("نسبة اكتمال الرهن العقاري")
 progress = (paid_balance / original_amount) * 100 if original_amount > 0 else 100
 fig_gauge = go.Figure(go.Indicator(
@@ -94,7 +81,7 @@ fig_gauge = go.Figure(go.Indicator(
 ))
 st.plotly_chart(fig_gauge)
 
-# 6. الخط الزمني للرصيد المتبقي
+# 3. الخط الزمني للرصيد المتبقي
 st.subheader("الخط الزمني للرصيد المتبقي")
 timeline_data = pd.DataFrame({
     "السنة": years,
