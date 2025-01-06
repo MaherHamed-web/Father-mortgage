@@ -56,21 +56,21 @@ start_date = datetime.now() - relativedelta(months=+months_paid)
 total_months = original_amount // monthly_payment
 end_date = start_date + relativedelta(months=+total_months)
 
-# عرض التفاصيل في خطوط منفصلة
-st.write("### الرصيد الأصلي")
-st.write(f"{original_amount:.2f} ريال")
+# عرض التفاصيل بخطوط كبيرة
+st.markdown("### الرصيد الأصلي")
+st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{original_amount:,.2f} ريال</p>", unsafe_allow_html=True)
 
-st.write("### الشهر الذي بدأ فيه السداد")
-st.write(f"{get_arabic_month(start_date)} {start_date.year}")
+st.markdown("### الشهر الذي بدأ فيه السداد")
+st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{get_arabic_month(start_date)} {start_date.year}</p>", unsafe_allow_html=True)
 
-st.write("### الشهر الحالي")
-st.write(f"{get_arabic_month(datetime.now())} {datetime.now().year}")
+st.markdown("### الشهر الحالي")
+st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{get_arabic_month(datetime.now())} {datetime.now().year}</p>", unsafe_allow_html=True)
 
-st.write("### الرصيد المتبقي")
-st.write(f"{remaining_balance:.2f} ريال")
+st.markdown("### الرصيد المتبقي")
+st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{remaining_balance:,.2f} ريال</p>", unsafe_allow_html=True)
 
-st.write("### تاريخ الانتهاء المتوقع")
-st.write(f"{get_arabic_month(end_date)} {end_date.year}")
+st.markdown("### تاريخ الانتهاء المتوقع")
+st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{get_arabic_month(end_date)} {end_date.year}</p>", unsafe_allow_html=True)
 
 # الرسم الدائري للرصيد المدفوع والمتبقي
 st.subheader("النسبة بين المدفوع والمتبقي")
