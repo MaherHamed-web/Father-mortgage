@@ -90,11 +90,6 @@ elif language == "العربية":
     df = pd.DataFrame(table_data)
     st.table(df)
 
-# Data for visualization: Remaining balance over time
-months = [row['Month'] for row in table_data]
-balances = [row['Remaining Balance (Riyals)'] for row in table_data]
-
-
 # Determine the correct key for the "Month" column based on language
 month_key = "Month" if language == "English" else "الشهر"
 balance_key = "Remaining Balance (Riyals)" if language == "English" else "الرصيد المتبقي (ريال)"
