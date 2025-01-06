@@ -56,16 +56,21 @@ start_date = datetime.now() - relativedelta(months=+months_paid)
 total_months = original_amount // monthly_payment
 end_date = start_date + relativedelta(months=+total_months)
 
-# ترتيب التفاصيل في أعمدة
-with st.container():
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write(f"### الرصيد الأصلي: {original_amount:.2f} ريال")
-        st.write(f"### الشهر الذي بدأ فيه السداد: {get_arabic_month(start_date)} {start_date.year}")
-    with col2:
-        st.write(f"### الشهر الحالي: {get_arabic_month(datetime.now())} {datetime.now().year}")
-        st.write(f"### الرصيد المتبقي: {remaining_balance:.2f} ريال")
-    st.write(f"### تاريخ الانتهاء المتوقع: {get_arabic_month(end_date)} {end_date.year}")
+# عرض التفاصيل في خطوط منفصلة
+st.write("### الرصيد الأصلي")
+st.write(f"{original_amount:.2f} ريال")
+
+st.write("### الشهر الذي بدأ فيه السداد")
+st.write(f"{get_arabic_month(start_date)} {start_date.year}")
+
+st.write("### الشهر الحالي")
+st.write(f"{get_arabic_month(datetime.now())} {datetime.now().year}")
+
+st.write("### الرصيد المتبقي")
+st.write(f"{remaining_balance:.2f} ريال")
+
+st.write("### تاريخ الانتهاء المتوقع")
+st.write(f"{get_arabic_month(end_date)} {end_date.year}")
 
 # الرسم الدائري للرصيد المدفوع والمتبقي
 st.subheader("النسبة بين المدفوع والمتبقي")
@@ -112,11 +117,3 @@ if table_toggle:
 
     df = pd.DataFrame(table_data)
     st.table(df)
-
-timeline_data = pd.DataFrame({
-    "السنة": [get_arabic_month(start_date) + " " + str(start_date.year)] + [
-        get_arabic_month(datetime.now()) + " " + str(datetime.now().year)
-    ],
-    "الرصيد المتبقي": [original_amount, remaining_balance]
-})
-st.area_chart(pd.DataFrame(timeline_data))
