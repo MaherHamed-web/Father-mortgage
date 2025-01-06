@@ -3,7 +3,6 @@ from datetime import datetime
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import altair as alt
 from dateutil.relativedelta import relativedelta  # To handle month-by-month increments
 
 # خريطة أسماء الأشهر العربية
@@ -29,7 +28,7 @@ def get_arabic_month(date):
 
 # إضافة التبديل لتعديل الأرقام
 st.title("متابعة سداد الرهن العقاري")
-st.subheader("تفاصيل الرهن العقاري")
+st.markdown("<hr>", unsafe_allow_html=True)  # Add a horizontal line for clarity
 
 toggle_edit = st.checkbox("تعديل الأرقام")  # Toggle to enable/disable editing
 
@@ -57,44 +56,18 @@ start_date = datetime.now() - relativedelta(months=+months_paid)
 total_months = original_amount // monthly_payment
 end_date = start_date + relativedelta(months=+total_months)
 
-# عرض التفاصيل الأساسية
-st.write(f"### الرصيد الأصلي: {original_amount:.2f} ريال")
-st.write(f"### الشهر الذي بدأ فيه السداد: {get_arabic_month(start_date)} {start_date.year}")
-st.write(f"### الشهر الحالي: {get_arabic_month(datetime.now())} {datetime.now().year}")
-st.write(f"### الرصيد المتبقي: {remaining_balance:.2f} ريال")
-st.write(f"### تاريخ الانتهاء المتوقع: {get_arabic_month(end_date)} {end_date.year}")
+# ترتيب التفاصيل في أعمدة
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"### الرصيد الأصلي: {original_amount:.2f} ريال")
+        st.write(f"### الشهر الذي بدأ فيه السداد: {get_arabic_month(start_date)} {start_date.year}")
+    with col2:
+        st.write(f"### الشهر الحالي: {get_arabic_month(datetime.now())} {datetime.now().year}")
+        st.write(f"### الرصيد المتبقي: {remaining_balance:.2f} ريال")
+    st.write(f"### تاريخ الانتهاء المتوقع: {get_arabic_month(end_date)} {end_date.year}")
 
-# إنشاء جدول السداد القادم
-st.subheader("جدول السداد القادم")
-table_data = []
-next_balance = remaining_balance
-next_month = datetime.now().replace(day=1)
-
-for i in range(1, total_months + 1):  # حتى اكتمال سداد الرهن
-    next_balance -= monthly_payment
-    if next_balance < 0:
-        next_balance = 0
-    table_data.append({
-        "السنة": next_month.year,
-        "الشهر": f"{get_arabic_month(next_month)} {next_month.year}",
-        "القسط الشهري (ريال)": monthly_payment,
-        "الرصيد المتبقي (ريال)": round(next_balance, 2)
-    })
-    next_month += relativedelta(months=+1)
-    if next_balance <= 0:
-        break
-
-df = pd.DataFrame(table_data)
-st.table(df)
-
-# تجميع البيانات حسب السنة
-yearly_data = df.groupby("السنة").last().reset_index()
-
-# بيانات للرسم البياني
-years = yearly_data["السنة"].astype(str)
-balances = yearly_data["الرصيد المتبقي (ريال)"]
-
-# 1. الرسم الدائري للرصيد المدفوع والمتبقي
+# الرسم الدائري للرصيد المدفوع والمتبقي
 st.subheader("النسبة بين المدفوع والمتبقي")
 paid_balance = original_amount - remaining_balance
 pie_data = pd.DataFrame({
@@ -102,9 +75,9 @@ pie_data = pd.DataFrame({
     "المبلغ": [paid_balance, remaining_balance]
 })
 fig_pie = px.pie(pie_data, values="المبلغ", names="الفئة", title="النسبة بين المدفوع والمتبقي")
-st.plotly_chart(fig_pie)
+st.plotly_chart(fig_pie, use_container_width=True)
 
-# 2. مقياس نسبة اكتمال الرهن العقاري
+# مقياس نسبة اكتمال الرهن العقاري
 st.subheader("نسبة اكتمال الرهن العقاري")
 progress = (paid_balance / original_amount) * 100 if original_amount > 0 else 100
 fig_gauge = go.Figure(go.Indicator(
@@ -113,17 +86,37 @@ fig_gauge = go.Figure(go.Indicator(
     title={'text': "نسبة الاكتمال (%)"},
     gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "green"}}
 ))
-st.plotly_chart(fig_gauge)
+st.plotly_chart(fig_gauge, use_container_width=True)
 
-# 3. الخط الزمني للرصيد المتبقي
+# الخط الزمني للرصيد المتبقي
 st.subheader("الخط الزمني للرصيد المتبقي")
+table_toggle = st.checkbox("عرض جدول السداد الكامل")  # Toggle to show/hide table
+if table_toggle:
+    table_data = []
+    next_balance = remaining_balance
+    next_month = datetime.now().replace(day=1)
+
+    for i in range(1, total_months + 1):  # حتى اكتمال سداد الرهن
+        next_balance -= monthly_payment
+        if next_balance < 0:
+            next_balance = 0
+        table_data.append({
+            "السنة": next_month.year,
+            "الشهر": f"{get_arabic_month(next_month)} {next_month.year}",
+            "القسط الشهري (ريال)": monthly_payment,
+            "الرصيد المتبقي (ريال)": round(next_balance, 2)
+        })
+        next_month += relativedelta(months=+1)
+        if next_balance <= 0:
+            break
+
+    df = pd.DataFrame(table_data)
+    st.table(df)
+
 timeline_data = pd.DataFrame({
-    "السنة": years,
-    "الرصيد المتبقي": balances
+    "السنة": [get_arabic_month(start_date) + " " + str(start_date.year)] + [
+        get_arabic_month(datetime.now()) + " " + str(datetime.now().year)
+    ],
+    "الرصيد المتبقي": [original_amount, remaining_balance]
 })
-timeline_chart = alt.Chart(timeline_data).mark_line(point=True).encode(
-    x='السنة',
-    y='الرصيد المتبقي',
-    tooltip=['السنة', 'الرصيد المتبقي']
-).properties(title="الخط الزمني للرصيد المتبقي")
-st.altair_chart(timeline_chart, use_container_width=True)
+st.area_chart(pd.DataFrame(timeline_data))
