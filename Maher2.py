@@ -39,12 +39,13 @@ if language == "English":
     next_balance = current_balance
     next_month = current_date.replace(day=1) if current_balance > 0 else end_date
 
-    for i in range(1, 25):  # Show up to the next 24 months
+    for i in range(1, total_months + 1):  # Show until the mortgage is paid off
         next_balance -= monthly_payment
         if next_balance < 0:
             next_balance = 0
         table_data.append({
             "Month": next_month.strftime('%B %Y'),
+            "Year": next_month.year,  # Add year for yearly grouping
             "Monthly Payment (Riyals)": monthly_payment,
             "Remaining Balance (Riyals)": round(next_balance, 2)
         })
@@ -75,12 +76,13 @@ elif language == "العربية":
     next_balance = current_balance
     next_month = current_date.replace(day=1) if current_balance > 0 else end_date
 
-    for i in range(1, 25):  # Show up to the next 24 months
+    for i in range(1, total_months + 1):  # Show until the mortgage is paid off
         next_balance -= monthly_payment
         if next_balance < 0:
             next_balance = 0
         table_data.append({
             "الشهر": next_month.strftime('%B %Y'),
+            "السنة": next_month.year,  # Add year for yearly grouping
             "القسط الشهري (ريال)": monthly_payment,
             "الرصيد المتبقي (ريال)": round(next_balance, 2)
         })
@@ -91,21 +93,25 @@ elif language == "العربية":
     df = pd.DataFrame(table_data)
     st.table(df)
 
-# Determine the correct key for the "Month" column based on language
+# Determine the correct key for the "Month" and "Year" columns based on language
 month_key = "Month" if language == "English" else "الشهر"
+year_key = "Year" if language == "English" else "السنة"
 balance_key = "Remaining Balance (Riyals)" if language == "English" else "الرصيد المتبقي (ريال)"
 
-# Data for visualization: Remaining balance over time
-months = [row[month_key] for row in table_data]
-balances = [row[balance_key] for row in table_data]
+# Group data by year
+yearly_data = df.groupby(year_key).last().reset_index()
+
+# Data for visualization
+years = yearly_data[year_key].astype(str)  # Convert years to string for charts
+balances = yearly_data[balance_key]
 
 # 1. Line Chart for Remaining Balance Over Time
 st.subheader("Remaining Balance Over Time")
-st.line_chart(pd.DataFrame({"Remaining Balance": balances}, index=months))
+st.line_chart(pd.DataFrame({"Remaining Balance": balances}, index=years))
 
-# 2. Bar Chart for Monthly Payments
-st.subheader("Monthly Payment Progress")
-st.bar_chart(pd.DataFrame({"Monthly Payment": [monthly_payment] * len(months)}, index=months))
+# 2. Bar Chart for Monthly Payments (Yearly Representation)
+st.subheader("Yearly Payment Progress")
+st.bar_chart(pd.DataFrame({"Yearly Payment": [monthly_payment * 12] * len(years)}, index=years))
 
 # 3. Pie Chart for Paid vs. Remaining Balance
 st.subheader("Paid vs. Remaining Balance")
@@ -119,8 +125,8 @@ st.plotly_chart(fig_pie)
 
 # 4. Cumulative Progress with an Area Chart
 st.subheader("Cumulative Payment Progress")
-cumulative_payments = [monthly_payment * (i + 1) for i in range(len(months))]
-st.area_chart(pd.DataFrame({"Cumulative Payments": cumulative_payments, "Remaining Balance": balances}, index=months))
+cumulative_payments = yearly_data[balance_key].iloc[0] - balances  # Calculate cumulative payments
+st.area_chart(pd.DataFrame({"Cumulative Payments": cumulative_payments, "Remaining Balance": balances}, index=years))
 
 # 5. Gauge Chart for Mortgage Completion Progress
 st.subheader("Mortgage Completion Progress")
@@ -133,15 +139,15 @@ fig_gauge = go.Figure(go.Indicator(
 ))
 st.plotly_chart(fig_gauge)
 
-# 6. Timeline Chart for Payment Milestones
+# 6. Timeline Chart for Payment Milestones (Yearly)
 st.subheader("Payment Milestones Timeline")
 timeline_data = pd.DataFrame({
-    "Month": months,
+    "Year": years,
     "Remaining Balance": balances
 })
 timeline_chart = alt.Chart(timeline_data).mark_line(point=True).encode(
-    x='Month',
+    x='Year',
     y='Remaining Balance',
-    tooltip=['Month', 'Remaining Balance']
+    tooltip=['Year', 'Remaining Balance']
 ).properties(title="Payment Milestones Timeline")
 st.altair_chart(timeline_chart, use_container_width=True)
