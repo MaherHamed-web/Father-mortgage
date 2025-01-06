@@ -27,10 +27,27 @@ def get_arabic_month(date):
     english_month = date.strftime('%B')  # Get the month in English
     return arabic_months[english_month]
 
-# تفاصيل الرهن العقاري
-original_amount = 500000  # الرصيد الأصلي (ريال)
-remaining_balance = 168000  # الرصيد المتبقي (ريال)
-monthly_payment = 1667      # القسط الشهري (ريال)
+# إضافة التبديل لتعديل الأرقام
+st.title("متابعة سداد الرهن العقاري")
+st.subheader("تفاصيل الرهن العقاري")
+
+toggle_edit = st.checkbox("تعديل الأرقام")  # Toggle to enable/disable editing
+
+# الأرقام الافتراضية
+default_original_amount = 500000  # الرصيد الأصلي (ريال)
+default_remaining_balance = 168000  # الرصيد المتبقي (ريال)
+default_monthly_payment = 1667  # القسط الشهري (ريال)
+
+if toggle_edit:
+    # عند تشغيل التبديل يمكن تعديل الأرقام
+    original_amount = st.number_input("الرصيد الأصلي (ريال)", value=default_original_amount, step=1000)
+    remaining_balance = st.number_input("الرصيد المتبقي (ريال)", value=default_remaining_balance, step=1000)
+    monthly_payment = st.number_input("القسط الشهري (ريال)", value=default_monthly_payment, step=100)
+else:
+    # في الحالة العادية استخدم الأرقام الافتراضية
+    original_amount = default_original_amount
+    remaining_balance = default_remaining_balance
+    monthly_payment = default_monthly_payment
 
 # حساب عدد الأشهر الإجمالي حتى الآن
 months_paid = (original_amount - remaining_balance) // monthly_payment
@@ -39,10 +56,6 @@ start_date = datetime.now() - relativedelta(months=+months_paid)
 # حساب عدد الأشهر الإجمالي وتاريخ الانتهاء
 total_months = original_amount // monthly_payment
 end_date = start_date + relativedelta(months=+total_months)
-
-# عرض العنوان والتفاصيل
-st.title("متابعة سداد الرهن العقاري")
-st.subheader("تفاصيل الرهن العقاري")
 
 # عرض التفاصيل الأساسية
 st.write(f"### الرصيد الأصلي: {original_amount:.2f} ريال")
