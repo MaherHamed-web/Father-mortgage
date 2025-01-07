@@ -34,7 +34,7 @@ toggle_edit = st.checkbox("تعديل الأرقام")  # Toggle to enable/disab
 
 # الأرقام الافتراضية
 default_original_amount = 500000  # الرصيد الأصلي (ريال)
-default_remaining_balance = 168000  # الرصيد المتبقي (ريال)
+default_remaining_balance = 168295.71  # الرصيد المتبقي (ريال)
 default_monthly_payment = 1667  # القسط الشهري (ريال)
 
 if toggle_edit:
