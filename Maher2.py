@@ -48,20 +48,13 @@ else:
     remaining_balance = default_remaining_balance
     monthly_payment = default_monthly_payment
 
-# حساب عدد الأشهر الإجمالي حتى الآن
-months_paid = (original_amount - remaining_balance) // monthly_payment
-start_date = datetime.now() - relativedelta(months=+months_paid)
-
 # حساب عدد الأشهر الإجمالي وتاريخ الانتهاء
 total_months = original_amount // monthly_payment
-end_date = start_date + relativedelta(months=+total_months)
+end_date = datetime.now() + relativedelta(months=+(total_months - (original_amount - remaining_balance) // monthly_payment))
 
 # عرض التفاصيل بخطوط كبيرة
 st.markdown("### الرصيد الأصلي")
 st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{original_amount:,.2f} ريال</p>", unsafe_allow_html=True)
-
-st.markdown("### الشهر الذي بدأ فيه السداد")
-st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{get_arabic_month(start_date)} {start_date.year}</p>", unsafe_allow_html=True)
 
 st.markdown("### الشهر الحالي")
 st.markdown(f"<p style='font-size:24px; font-weight:bold;'>{get_arabic_month(datetime.now())} {datetime.now().year}</p>", unsafe_allow_html=True)
